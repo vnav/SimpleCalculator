@@ -10,6 +10,7 @@
 		$scope.result = 0;
 		$scope.operation = "Add";
  		$scope.buffer = 0;
+		$scope.cleared = true;
 		
 		$scope.onClickClear = function() {
 			$scope.inputValue = "0";
@@ -17,33 +18,16 @@
 			$scope.result = 0;
 			$scope.operation = "Add";
 			$scope.buffer = 0;
+			$scope.cleared = true;
 		};		
 		
-		$scope.onClickTotal = function() {			
-			switch($scope.operation) {
-				case "Add" :
-					$scope.result += parseFloat($scope.inputValue);
-					break;
-				case "Subtract" :
-					$scope.result -= parseFloat($scope.inputValue);
-					break;
-				case "Multiply" :
-					$scope.result *= parseFloat($scope.inputValue);
-					break;
-				case "Divide" :
-					$scope.result /= parseFloat($scope.inputValue);
-					break;
-			}
-			
-			$scope.inputValue = $scope.result;
-		};
-
 		$scope.onClickSquareRoot = function() {
 			$scope.inputValue = Math.sqrt(parseFloat($scope.inputValue));
 			$scope.recall += "sqrt(" + $scope.inputValue + " ) ";
 		};
 
 		$scope.onClickPow = function() {
+			/*
 			if($scope.buffer == 0){
 				$scope.buffer = $scope.inputValue
 			} else {
@@ -51,13 +35,18 @@
 				$scope.recall += "pow(" + $scope.buffer + "," +$scope.inputValue + " ) ";
 				$scope.buffer == 0
 			}
+			*/
 		};
 		
 		$scope.onClickTextDisplay = function(str) {
 			var tempStr = $scope.inputValue;
 			
-			if($scope.computed == true) {
+			if($scope.computed) {
 				tempStr = "";
+			}
+			
+			if($scope.cleared) {
+				$scope.onClickClear();
 			}
 			
 			if("Negative" == str) {
@@ -72,25 +61,40 @@
 						
 			$scope.inputValue = filterNumeric(tempStr);
 			$scope.computed = false;
+			$scope.cleared = false;
 		};
 		
 		$scope.onClickOperation = function(mode) {
-			if($scope.inputValue != "0") {				
+			if($scope.cleared) {
+				$scope.onClickClear();
+			}			
+
+			if($scope.inputValue != "0") {						
 				switch(mode) {
 					case "Add" :
-							$scope.recall += $scope.inputValue + " + ";														
+						$scope.recall += $scope.inputValue + " + ";	
+						$scope.cleared = false;						
 						break;
 					case "Subtract" :
-							$scope.recall += $scope.inputValue + " - ";							
+						$scope.recall += $scope.inputValue + " - ";							
+						$scope.cleared = false;
 						break;
 					case "Multiply" :
-							$scope.recall += $scope.inputValue + " * ";
+						$scope.recall += $scope.inputValue + " * ";
+						$scope.cleared = false;
 						break;
 					case "Divide" :
-							$scope.recall += $scope.inputValue + " / ";
+						$scope.recall += $scope.inputValue + " / ";
+						$scope.cleared = false;
 						break;
+					case "Total" :
+						$scope.recall += $scope.inputValue;
+						$scope.cleared = true;
+						break;
+						
 				};
-				$scope.onClickTotal();
+				$scope.result = computeTotal($scope.operation, $scope.result, $scope.inputValue);
+				$scope.inputValue = $scope.result;
 				$scope.operation = mode;
 				$scope.computed = true;
 			}	
@@ -142,4 +146,23 @@
 		return tempStr;
 	};
 	
+	function computeTotal(mode, subtotal, input) {
+		var result = subtotal;
+		switch(mode) {
+			case "Add" :
+				result += parseFloat(input);
+				break;
+			case "Subtract" :
+				result -= parseFloat(input);
+				break;
+			case "Multiply" :
+				result *= parseFloat(input);
+				break;
+			case "Divide" :
+				result /= parseFloat(input);
+				break;
+		}
+			
+		return result;
+	};
 	
